@@ -1,0 +1,4 @@
+name: TD
+version: '${version}'
+main: de.derioo.td.Main
+api-version: '1.20'
