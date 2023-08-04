@@ -28,20 +28,22 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        if (Bukkit.getWorld("void") == null){
+        if (Bukkit.getWorld("world") == null){
             Logger.log(Logger.ERROR, "Void Welt exestiert nicht!");
-            Bukkit.getPluginManager().disablePlugin(Main.getInstance());
+            Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
 
+        if (!DataBase.setup())return;
+
         createWorlds();
 
-        if (!DataBase.setup())return;
+        handler = new TowerDefenceHandler();
 
         registerListeners();
         initCommands();
 
-        handler = new TowerDefenceHandler();
+
     }
 
     private void initCommands() {
@@ -60,10 +62,10 @@ public final class Main extends JavaPlugin {
 
     private void createWorlds(){
         if (Bukkit.getWorld("hub") == null) {
-            Bukkit.createWorld(new WorldCreator("hub").copy(Bukkit.getWorld("void")));
+            Bukkit.createWorld(new WorldCreator("hub").copy(Bukkit.getWorld("world")));
         }
         if (Bukkit.getWorld("islands") == null) {
-            Bukkit.createWorld(new WorldCreator("islands").copy(Bukkit.getWorld("void")));
+            Bukkit.createWorld(new WorldCreator("islands").copy(Bukkit.getWorld("world")));
         }
     }
 

@@ -4,16 +4,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.derioo.td.Main;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class TowerDefenceHandler {
 
@@ -36,8 +33,9 @@ public class TowerDefenceHandler {
     }
 
     public void joinPlayer(UUID uuid) {
-        if (!isRegistered(uuid)) register(uuid);
-        users.put(uuid, JsonParser.parseString(DataBase.getInstance().getUserData(uuid)).getAsJsonObject());
+        if (!isRegistered(uuid)) {
+            register(uuid);
+        } else users.put(uuid, JsonParser.parseString(DataBase.getInstance().getUserData(uuid)).getAsJsonObject());
 
     }
 
@@ -52,7 +50,7 @@ public class TowerDefenceHandler {
             return generatedIslands.get(profile);
         }
         int islands = Island.islands.size();
-        Location location = new Location(Bukkit.getWorld("islands"), 0, 100, 10000 * islands);
+        Location location = new Location(Bukkit.getWorld("islands"), 10000, 100, 10000 * islands);
 
         return new Island(location, profile.getProfile(), false);
     }
@@ -75,10 +73,12 @@ public class TowerDefenceHandler {
         profiles.add(firstProfile);
         o.add("profiles", profiles);
 
+        new Profile(firstProfile);
+
         users.put(uuid, o);
     }
 
-    public void generateIsland(Island island){
+    public void generateIsland(Island island) {
         JsonObject world = island.getProfile().get("world_settings").getAsJsonObject();
 
         JsonObject format = world.get("world_settings").getAsJsonObject().get("format").getAsJsonObject();
@@ -89,42 +89,58 @@ public class TowerDefenceHandler {
         int length = format.get("length").getAsInt();
 
 
+        for (int i = 0; i < height; i += 1) {
 
-        for (int i = 0; i < height; i++) {
-
-            for (int j = 0; j < length; j++) {
-                blocks.put(i+":"+j,
-                        world.get("world").getAsJsonArray().get(i + (j*length)).getAsString().equals("-") ?
+            for (int j = 0; j < length; j += 1) {
+                blocks.put(i * 16 + ":" + j * 16,
+                        world.get("world").getAsJsonArray().get(j + (i * length)).getAsString().equals("-") ?
                                 Material.GOLD_BLOCK.createBlockData()
                                 :
                                 Material.DIAMOND_BLOCK.createBlockData());
             }
         }
 
+        World w = Bukkit.getWorld("islands");
+
+        if (w == null) throw new IllegalStateException("123");
+
 
         blocks.forEach((s, blockData) -> {
+            int x = Integer.parseInt(s.split(":")[0]);
+            int y = Integer.parseInt(s.split(":")[1]);
+
+            Chunk chunk = w.getChunkAt(new Location(w, x, 100, island.getCenter().getZ() + y));
+
+            int chunkX = chunk.getX();
+            int chunkZ = chunk.getZ();
+
+            for (x = chunkX * 16; x < (chunkX + 1) * 16; x++) {
+                for (int z = chunkZ * 16; z < (chunkZ + 1) * 16; z++) {
+                    Block block = w.getBlockAt(x, 100, z);
+                    block.setBlockData(blockData);
+                    w.getBlockAt(x, 101, z).setBlockData(Material.LIGHT.createBlockData());
+                    if (blockData.getMaterial().equals(Material.GOLD_BLOCK)) {
+                        w.getBlockAt(x, 99, z).setBlockData(Material.DIRT.createBlockData());
+                    }
+                }
+            }
 
         });
 
+
     }
 
-    /*TODO
-     *     "world":
-     *       [
-     *       "F", "F", "F", "F", "F", "F",
-     *       "-", "-", "-", "-", "F", "F",
-     *       "F", "F", "F", "-", "F", "F",
-     *       "F", "F", "F", "-", "-", "-",
-     *       "F", "F", "F", "F", "F", "F"
-     *     ],
-     *     "world_settings": {
-     *       "format": {
-     *         "length": 6,
-     *         "height": 5
-     *       }
-     *     }
-     */
 
+    public List<Chunk> getChunks(Chunk centerChunk, int radius) {
+        List<Chunk> chunks = new ArrayList<>();
+        for (int x = centerChunk.getX() - radius; x < centerChunk.getX() + radius; x++) {
+            for (int z = centerChunk.getZ() - radius; z < centerChunk.getZ() + radius; z++) {
+                Chunk chunk = centerChunk.getWorld().getChunkAt(x, z);
+                chunks.add(chunk);
+            }
+        }
+        return chunks;
+    }
 
     public Location getHub() {
         return LocationUtils.getLocation(config.get("hub").getAsJsonObject());

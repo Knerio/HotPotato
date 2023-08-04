@@ -25,6 +25,8 @@ public class JoinProfileCommand extends Command{
         }
         JsonObject data = TowerDefenceHandler.users.get(p.getUniqueId());
 
+        System.out.println(data);
+
         Island island = handler.getIsland(Profile.getProfile(data.get("profiles").getAsJsonArray().get(0).getAsJsonObject()));
 
         if (!island.isGenerated()){
