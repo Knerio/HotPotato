@@ -1,4 +1,5 @@
-package de.derioo.td.utils;
+package de.derioo.gameapi.utils;
+
 
 import java.io.*;
 

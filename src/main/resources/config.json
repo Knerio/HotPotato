@@ -1,26 +1,41 @@
 {
-  "hub": {
-    "world": "hub",
-    "x": 0,
-    "y": 0,
-    "z": 0,
-    "yaw": 0,
-    "pitch": 0
+  "timeConfig": {
+    "maxTimePerRoundInTicks": 500,
+    "timeLossPerRoundInTicks": 10
   },
-  "default_world": {
-    "world":
-      [
-      "F", "F", "F", "F", "F", "F",
-      "-", "-", "-", "-", "F", "F",
-      "F", "F", "F", "-", "F", "F",
-      "F", "F", "F", "-", "-", "-",
-      "F", "F", "F", "F", "F", "F"
-    ],
-    "world_settings": {
-      "format": {
-        "length": 6,
-        "height": 5
-      }
+  "locations": {
+    "spawn": {
+      "world": "world",
+      "x": 0,
+      "y": 100,
+      "z": 0,
+      "yaw": 0,
+      "pitch": 0
+    },
+    "hub": {
+      "world": "world",
+      "x": 1000,
+      "y": 100,
+      "z": 0,
+      "yaw": 0,
+      "pitch": 0
+    }
+
+  },
+  "messages": {
+    "bossbar": "§1Spiel läuft noch §9{duration}",
+    "actionbar": "§1Deine Rolle: §9{role}",
+    "started": "§1Du hast das Spiel gestartet",
+    "reload": "§1Du hast die Config neu geladen",
+    "reload-failed": "§1Die Config wird nicht richtig erkannt, versuche es erneut\n siehe Konsole für Stacktrace",
+    "chatmessages": {
+      "eliminated": "§9{player} §1ist ausgeschieden",
+      "won": "§9{player} §1hat gewonnen"
+    },
+    "roles": {
+      "player": "Spieler",
+      "potato": "KartoffelHalter"
     }
   }
+
 }

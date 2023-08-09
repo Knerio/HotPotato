@@ -1,4 +1,4 @@
-package de.derioo.td.utils;
+package de.derioo.gameapi.utils;
 
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;

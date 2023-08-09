@@ -1,9 +1,7 @@
-package de.derioo.td.commands;
+package de.derioo.gameapi.utils;
 
 
-import de.derioo.td.Main;
-import de.derioo.td.utils.Logger;
-import org.bukkit.Bukkit;
+import de.derioo.gameapi.Main;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -29,7 +27,7 @@ public abstract class Command implements CommandExecutor, TabCompleter {
 
         PluginCommand command = Main.getInstance().getCommand(name);
         if (command == null){
-            Logger.log(Logger.ERROR, "§cDer Comannd " + name + " konnte nicht regestriert werden, bitte überprüfen die plugin.yml");
+            System.out.println("konnte nicht geladen werden ("+name+")");
         }else {
             command.setExecutor(this);
             command.setTabCompleter(this);
@@ -101,4 +99,3 @@ public abstract class Command implements CommandExecutor, TabCompleter {
         return completeList;
     }
 }
-
