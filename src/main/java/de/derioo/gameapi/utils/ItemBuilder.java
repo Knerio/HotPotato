@@ -1,13 +1,17 @@
 package de.derioo.gameapi.utils;
 
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import org.apache.commons.codec.binary.Base64;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -24,22 +28,22 @@ public class ItemBuilder {
 
     private final ItemStack itemStack;
 
-    public ItemBuilder(Material material){
+    public ItemBuilder(Material material) {
         this.itemStack = new ItemStack(material);
     }
 
-    public ItemBuilder(Material material, int amount){
+    public ItemBuilder(Material material, int amount) {
         this.itemStack = new ItemStack(material, amount);
     }
-    public ItemBuilder(ItemStack item){
+
+    public ItemBuilder(ItemStack item) {
         this.itemStack = item;
     }
 
     /**
-     *
      * @param name sets the specified name
      */
-    public ItemBuilder setName(String name){
+    public ItemBuilder setName(String name) {
         ItemMeta meta = this.itemStack.getItemMeta();
         meta.setDisplayName(name);
         this.itemStack.setItemMeta(meta);
@@ -47,19 +51,19 @@ public class ItemBuilder {
     }
 
     /**
-     *
      * @param material sets the specified material
      */
-    public ItemBuilder setType(Material material){
+    public ItemBuilder setType(Material material) {
         itemStack.setType(material);
         return this;
     }
 
     /**
-     *  Hides all item flags
+     * Hides all item flags
+     *
      * @see ItemBuilder#addFlags(ItemFlag...)
      */
-    public ItemBuilder hideAllFlags(){
+    public ItemBuilder hideAllFlags() {
         ItemMeta meta = this.itemStack.getItemMeta();
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES,
                 ItemFlag.HIDE_DYE,
@@ -71,46 +75,37 @@ public class ItemBuilder {
     }
 
 
-
     /**
-     *
-     *
-     *  @param flags adds specified ItemFlags
+     * @param flags adds specified ItemFlags
      */
-    public ItemBuilder addFlags(ItemFlag... flags){
+    public ItemBuilder addFlags(ItemFlag... flags) {
         ItemMeta meta = this.itemStack.getItemMeta();
         meta.addItemFlags(flags);
         return this;
     }
 
     /**
-     *
-     *
-     *  @param flags removes specified ItemFlags
+     * @param flags removes specified ItemFlags
      */
-    public ItemBuilder removeFlags(ItemFlag... flags){
+    public ItemBuilder removeFlags(ItemFlag... flags) {
         ItemMeta meta = this.itemStack.getItemMeta();
         meta.removeItemFlags(flags);
         return this;
     }
 
     /**
-     *
-     *
-     *  @param enchantment adds the specified enchantment
+     * @param enchantment adds the specified enchantment
      */
-    public ItemBuilder addEnchant(Enchantment enchantment, int level, boolean restriction){
+    public ItemBuilder addEnchant(Enchantment enchantment, int level, boolean restriction) {
         ItemMeta meta = this.itemStack.getItemMeta();
         meta.addEnchant(enchantment, level, restriction);
         return this;
     }
 
     /**
-     *
-     *
-     *  @param enchantment removes the specified enchantment
+     * @param enchantment removes the specified enchantment
      */
-    public ItemBuilder removeEnchant(Enchantment enchantment){
+    public ItemBuilder removeEnchant(Enchantment enchantment) {
         ItemMeta meta = this.itemStack.getItemMeta();
         meta.removeEnchant(enchantment);
         return this;
@@ -118,11 +113,9 @@ public class ItemBuilder {
 
 
     /**
-     *
-     *
-     *  @param lore adds the specified lore's
+     * @param lore adds the specified lore's
      */
-    public ItemBuilder addLore(String... lore){
+    public ItemBuilder addLore(String... lore) {
         ItemMeta meta = this.itemStack.getItemMeta();
         List<String> oldLore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
         oldLore.addAll(Arrays.asList(lore));
@@ -131,11 +124,9 @@ public class ItemBuilder {
     }
 
     /**
-     *
-     *
-     *  @param lore set the specified lore's
+     * @param lore set the specified lore's
      */
-    public ItemBuilder setLore(String... lore){
+    public ItemBuilder setLore(String... lore) {
         ItemMeta meta = this.itemStack.getItemMeta();
         meta.setLore(Arrays.asList(lore));
         this.itemStack.setItemMeta(meta);
@@ -143,11 +134,9 @@ public class ItemBuilder {
     }
 
     /**
-     *
-     *
-     *  @param lore sets the lore
+     * @param lore sets the lore
      */
-    public ItemBuilder setLore(List<String> lore){
+    public ItemBuilder setLore(List<String> lore) {
         ItemMeta meta = this.itemStack.getItemMeta();
         meta.setLore(lore);
         this.itemStack.setItemMeta(meta);
@@ -155,11 +144,9 @@ public class ItemBuilder {
     }
 
     /**
-     *
-     *
-     *  @param lore removes the specified lore's
+     * @param lore removes the specified lore's
      */
-    public ItemBuilder removeLore(String... lore){
+    public ItemBuilder removeLore(String... lore) {
         ItemMeta meta = this.itemStack.getItemMeta();
         List<String> oldLore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
         oldLore.removeAll(Arrays.asList(lore));
@@ -168,24 +155,20 @@ public class ItemBuilder {
     }
 
     /**
-     *
-     *
-     *  @param amount the new item amount
+     * @param amount the new item amount
      */
-    public ItemBuilder setAmount(int amount){
+    public ItemBuilder setAmount(int amount) {
         this.itemStack.setAmount(amount);
         return this;
     }
 
     /**
-     *
-     *
-     *  @param color the new color of the armor
-     *  @throws IllegalArgumentException if the material is not an leatherAmor
-     *
+     * @param color the new color of the armor
+     * @throws IllegalArgumentException if the material is not an leatherAmor
      */
-    public ItemBuilder setLeatherColor(Color color) throws IllegalArgumentException{
-        if (!this.itemStack.getType().toString().toLowerCase().contains("leather_"))throw new IllegalArgumentException("Head needs LeatherArmor as Material");
+    public ItemBuilder setLeatherColor(Color color) throws IllegalArgumentException {
+        if (!this.itemStack.getType().toString().toLowerCase().contains("leather_"))
+            throw new IllegalArgumentException("Head needs LeatherArmor as Material");
         LeatherArmorMeta meta = (LeatherArmorMeta) this.itemStack.getItemMeta();
         meta.setColor(color);
         this.itemStack.setItemMeta(meta);
@@ -193,21 +176,18 @@ public class ItemBuilder {
     }
 
     /**
-     *
-     *
-     *  @param url the skull texture url
-     *  @throws IllegalArgumentException if the material is not an skull
-     *
+     * @param url the skull texture url
+     * @throws IllegalArgumentException if the material is not an skull
      */
-    public ItemBuilder setCustomSkull(String url)  throws IllegalArgumentException{
-        if (!this.itemStack.getType().equals(Material.PLAYER_HEAD)){
+    public ItemBuilder setCustomSkull(String url) throws IllegalArgumentException {
+        if (!this.itemStack.getType().equals(Material.PLAYER_HEAD)) {
             throw new IllegalArgumentException("Head needs PlayerHead as Material");
         }
 
         SkullMeta headMeta = (SkullMeta) this.itemStack.getItemMeta();
 
         GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-        byte[] encodedData = Base64.encodeBase64(String.format("{textures:{SKIN:{url:\"%s\"}}}", new Object[] { url }).getBytes());
+        byte[] encodedData = Base64.encodeBase64(String.format("{textures:{SKIN:{url:\"%s\"}}}", new Object[]{url}).getBytes());
         profile.getProperties().put("textures", new Property("textures", new String(encodedData)));
         Field profileField = null;
         try {
@@ -217,19 +197,16 @@ public class ItemBuilder {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        this.itemStack.setItemMeta((ItemMeta)headMeta);
+        this.itemStack.setItemMeta((ItemMeta) headMeta);
         return this;
     }
 
     /**
-     *
-     *
-     *  @param url the skull texture url
-     *  @throws IllegalArgumentException if the material is not an skull
-     *
+     * @param data the skull texture url
+     * @throws IllegalArgumentException if the material is not an skull
      */
-    public ItemBuilder setCustomSkullWithValue(String data)  throws IllegalArgumentException{
-        if (!this.itemStack.getType().equals(Material.PLAYER_HEAD)){
+    public ItemBuilder setCustomSkullWithValue(String data) throws IllegalArgumentException {
+        if (!this.itemStack.getType().equals(Material.PLAYER_HEAD)) {
             throw new IllegalArgumentException("Head needs PlayerHead as Material");
         }
 
@@ -245,65 +222,71 @@ public class ItemBuilder {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        this.itemStack.setItemMeta((ItemMeta)headMeta);
+        this.itemStack.setItemMeta((ItemMeta) headMeta);
         return this;
     }
 
     /**
-     *
-     *
-     *  @param player the player Of the Skull
-     *  @throws IllegalArgumentException if the material is not an skull
-     *
+     * @param player the player Of the Skull
+     * @throws IllegalArgumentException if the material is not an skull
      */
-    public ItemBuilder setSkull(Player player)  throws IllegalArgumentException{
-        if (!this.itemStack.getType().equals(Material.PLAYER_HEAD)){
+    public ItemBuilder setSkull(Player player) throws IllegalArgumentException {
+        if (!this.itemStack.getType().equals(Material.PLAYER_HEAD)) {
             throw new IllegalArgumentException("Head needs PlayerHead as Material");
         }
 
         SkullMeta headMeta = (SkullMeta) this.itemStack.getItemMeta();
         headMeta.setOwningPlayer(player);
-        this.itemStack.setItemMeta((ItemMeta)headMeta);
+        this.itemStack.setItemMeta((ItemMeta) headMeta);
         return this;
     }
 
     /**
-     *
-     *
-     *  @param player the player Of the Skull
-     *  @throws IllegalArgumentException if the material is not an skull
-     *   @see ItemBuilder#setSkull(Player)
-     *
+     * @param player the player Of the Skull
+     * @throws IllegalArgumentException if the material is not an skull
+     * @see ItemBuilder#setSkull(Player)
      */
-    public ItemBuilder setSkull(String player)  throws IllegalArgumentException{
-        if (!this.itemStack.getType().equals(Material.PLAYER_HEAD)){
+    public ItemBuilder setSkull(String player) throws IllegalArgumentException {
+        if (!this.itemStack.getType().equals(Material.PLAYER_HEAD)) {
             throw new IllegalArgumentException("Head needs PlayerHead as Material");
         }
 
         SkullMeta headMeta = (SkullMeta) this.itemStack.getItemMeta();
         headMeta.setOwner(player);
-        this.itemStack.setItemMeta((ItemMeta)headMeta);
+        this.itemStack.setItemMeta((ItemMeta) headMeta);
         return this;
     }
 
     /**
-     *
-     *  @return ItemStack the final ItemStack
-     *
+     * @return ItemStack the final ItemStack
      */
-    public ItemStack toItemStack(){
+    public ItemStack toItemStack() {
         return this.itemStack;
     }
 
     /**
-     *
-     *  @return ItemStack the final ItemStack
-     *
+     * @return ItemStack the final ItemStack
      */
-    public ItemStack build(){
+    public ItemStack build() {
         return this.itemStack;
     }
 
+    public static ItemBuilder fromJson(JsonObject object) {
+        ItemBuilder builder = new ItemBuilder(Material.valueOf(object.get("material").getAsString()));
+
+        if (object.has("lore"))
+            if (object.get("lore").getAsJsonArray().size() != 0){
+                builder = builder.setLore(object.get("lore").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList());
+            }
+        if (object.has("name"))
+            builder = builder.setName(object.get("name").getAsString());
+        if (object.has("is-custom-skull")) {
+            if (object.get("is-custom-skull").getAsBoolean()) {
+                builder = builder.setCustomSkullWithValue(object.get("custom-skull-value").getAsString());
+            }
+        }
+        return builder;
+    }
 }
 
 

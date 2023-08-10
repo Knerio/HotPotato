@@ -17,7 +17,7 @@ public class GameManager {
         this.minigames = List.of(minigames);
         this.plugin = plugin;
 
-        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        Bukkit.getScheduler().runTaskTimer(this.plugin, () -> {
             for (Minigame minigame : minigames) {
                 if (minigame.isRunning())minigame.onRunning();
             }

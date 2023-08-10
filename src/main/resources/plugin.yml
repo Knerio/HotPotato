@@ -1,4 +1,4 @@
-name: TD
+name: GameAPI
 version: '${version}'
 main: de.derioo.gameapi.Main
 api-version: '1.20'

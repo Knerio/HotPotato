@@ -1,13 +1,15 @@
 package de.derioo.gameapi.hotpotato;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.derioo.gameapi.utils.ItemBuilder;
 import de.derioo.gameapi.utils.LocationUtils;
 import de.derioo.gameapi.Main;
+import de.derioo.gameapi.utils.ConfigHandler;
 import de.derioo.gameapi.utils.Minigame;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
@@ -21,10 +23,12 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 
-public class HotPotato extends Minigame implements Listener {
+public class HotPotatoGame extends Minigame implements Listener {
 
     private ArrayList<UUID> players;
     private String bossbar;
@@ -38,7 +42,7 @@ public class HotPotato extends Minigame implements Listener {
 
     private final Map<Player, BossBar> bossbars = new HashMap<>();
 
-    public HotPotato(Plugin plugin) {
+    public HotPotatoGame(Plugin plugin) {
         this.maxTimePerRound = Main.getInstance().getJsonConfig().get("timeConfig").getAsJsonObject().get("maxTimePerRoundInTicks").getAsInt();
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, this.plugin);
@@ -46,7 +50,7 @@ public class HotPotato extends Minigame implements Listener {
 
     @Override
     public void onLeave(Player p) {
-        if (p.equals(potatoPlayer)) setNewPotatoPlayer();
+        if (p.equals(potatoPlayer)) this.setNewPotatoPlayer();
         this.removePlayer(p);
     }
 
@@ -59,26 +63,26 @@ public class HotPotato extends Minigame implements Listener {
     public void onStart(ArrayList<UUID> startPlayers) {
         this.players = startPlayers;
         this.duration = 0;
-        this.bossbar = Main.getInstance().getJsonConfig().get("messages").getAsJsonObject().get("bossbar").getAsString();
-        setNewPotatoPlayer();
+        this.bossbar = ConfigHandler.getMessage("bossbar").getAsString();
+        this.setNewPotatoPlayer();
         ItemStack[] emptyItems = new ItemStack[0];
 
-        players.forEach(uuid -> {
+        this.players.forEach(uuid -> {
             Player p = Bukkit.getPlayer(uuid);
             if (!p.equals(this.potatoPlayer)) {
                 p.getInventory().setArmorContents(emptyItems);
                 p.getInventory().setContents(emptyItems);
                 p.getInventory().setExtraContents(emptyItems);
             }
-            p.teleportAsync(LocationUtils.getLocation(Main.getInstance().getJsonConfig().get("locations").getAsJsonObject().get("spawn").getAsJsonObject()));
-            updateBossbar(uuid);
+            p.teleportAsync(LocationUtils.getLocation(ConfigHandler.get("locations.spawn").getAsJsonObject()));
+            this.updateBossbar(uuid);
         });
 
     }
 
     @Override
     public void onStop() {
-        bossbars.forEach((p, bossBar) -> bossBar.removePlayer(p));
+        this.bossbars.forEach((p, bossBar) -> bossBar.removePlayer(p));
     }
 
     @Override
@@ -89,37 +93,42 @@ public class HotPotato extends Minigame implements Listener {
             this.nextRound();
             return;
         }
-        updateBossbar();
+        this.updateBossbar();
+
+        this.players.forEach(uuid -> {
+            Player p = Bukkit.getPlayer(uuid);
+            p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 15, 1));
+        });
+        this.potatoPlayer.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, this.potatoPlayer.getLocation().clone().add(0, 2,0), 1);
+        this.potatoPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 15, 2));
     }
 
     public void removePlayer(Player player) {
-        players.remove(player.getUniqueId());
+        this.players.remove(player.getUniqueId());
         ItemStack[] emptyItems = new ItemStack[0];
 
         player.getInventory().setContents(emptyItems);
         player.getInventory().setArmorContents(emptyItems);
         player.getInventory().setExtraContents(emptyItems);
-
-
-        new ArrayList<>(players).stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).forEach(uuid -> {
-            Player p = Bukkit.getPlayer(uuid);
-            p.sendMessage(Component.text(Main.getInstance().getJsonConfig().get("messages").getAsJsonObject().get("chatmessages").getAsJsonObject().get("eliminated").getAsString().replace("{player}",player.getName())));
-        });
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(Component.text(ConfigHandler.getMessage("chatmessages.eliminated").getAsString().replace("{player}",player.getName())));
+        }
         this.onPlayerDie(player);
     }
 
     private void nextRound() {
         this.maxTimePerRound = (this.maxTimePerRound - Main.getInstance().getJsonConfig().get("timeConfig").getAsJsonObject().get("timeLossPerRoundInTicks").getAsInt()) <= 0 ? this.maxTimePerRound : (this.maxTimePerRound - Main.getInstance().getJsonConfig().get("timeConfig").getAsJsonObject().get("timeLossPerRoundInTicks").getAsInt());
-        if (players.size() <= 1) {
-            new ArrayList<>(players).stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).forEach(uuid -> {
-                Player p = Bukkit.getPlayer(uuid);
-                p.sendMessage(Component.text( Main.getInstance().getJsonConfig().get("messages").getAsJsonObject().get("chatmessages").getAsJsonObject().get("won").getAsString().replace("{player}", Bukkit.getPlayer(players.get(0)).getName())));
-            });
+        if (this.players.size() <= 1) {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(Component.text(ConfigHandler.getMessage("chatmessages.won").getAsString().replace("{player}", Bukkit.getPlayer(this.players.get(0)).getName())));
+            }
+
+            Bukkit.getPlayer(this.players.get(0)).teleportAsync(LocationUtils.getLocation(ConfigHandler.get("locations.win").getAsJsonObject()));
             this.stop();
             return;
         }
 
-        setNewPotatoPlayer();
+        this.setNewPotatoPlayer();
     }
 
 
@@ -129,9 +138,9 @@ public class HotPotato extends Minigame implements Listener {
         if (!(e.getEntity() instanceof Player player)) return;
 
         if (hitter.equals(this.potatoPlayer)) {
-            setPotatoPlayer(player);
+            this.setPotatoPlayer(player);
 
-            spawnFirework(player);
+            this.spawnFirework(player);
         }
     }
 
@@ -145,42 +154,42 @@ public class HotPotato extends Minigame implements Listener {
                 .build());
         firework.setFireworkMeta(meta);
 
-        Bukkit.getScheduler().runTaskLater(plugin, firework::detonate, 100);
+        Bukkit.getScheduler().runTaskLater(this.plugin, firework::detonate, 100);
     }
 
 
     private void updateBossbar(UUID uuid) {
         Player p = Bukkit.getPlayer(uuid);
         if (p == null) {
-            players.remove(uuid);
+            this.players.remove(uuid);
             return;
         }
-        BossBar bossBar = bossbars.getOrDefault(p, Bukkit.createBossBar(this.bossbar.replace("{duration}", getFormattedTime()), BarColor.BLUE, BarStyle.SOLID));
+        BossBar bossBar = this.bossbars.getOrDefault(p, Bukkit.createBossBar(this.bossbar.replace("{duration}", this.getFormattedTime()), BarColor.BLUE, BarStyle.SOLID));
         bossBar.setProgress((double) (this.maxTimePerRound - this.duration) / this.maxTimePerRound);
-        bossBar.setTitle(this.bossbar.replace("{duration}", getFormattedTime()));
-        bossbars.put(p, bossBar);
+        bossBar.setTitle(this.bossbar.replace("{duration}", this.getFormattedTime()));
+        this.bossbars.put(p, bossBar);
         bossBar.addPlayer(p);
         p.spigot().sendMessage(ChatMessageType.ACTION_BAR,
-                TextComponent.fromLegacyText(Main.getInstance().getJsonConfig().get("messages").getAsJsonObject().get("actionbar").getAsString().replace("{role}",getRole(uuid))));
+                TextComponent.fromLegacyText(ConfigHandler.getMessage("actionbar").getAsString().replace("{role}",this.getRole(uuid))));
     }
 
     private String getRole(UUID uuid) {
-        JsonObject o = Main.getInstance().getJsonConfig().get("messages").getAsJsonObject().get("roles").getAsJsonObject();
+        JsonObject o = ConfigHandler.getMessage("roles").getAsJsonObject();
         return this.potatoPlayer.getUniqueId().equals(uuid) ? o.get("potato").getAsString() : o.get("player").getAsString();
     }
 
 
     private String getFormattedTime() {
         int ticks = this.maxTimePerRound - this.duration;
-        int seconds = (int) ticks / 20;
-        return seconds + " seconds";
+        int seconds = ticks / 20;
+        return ConfigHandler.getMessage("formatted-time").getAsString().replace("{seconds}", String.valueOf(seconds));
     }
 
     private void setNewPotatoPlayer() {
-        ArrayList<UUID> copiedList = new ArrayList<>(players);
+        ArrayList<UUID> copiedList = new ArrayList<>(this.players);
         Collections.shuffle(copiedList);
         UUID newPlayer = copiedList.get(0);
-        setPotatoPlayer(Bukkit.getPlayer(newPlayer));
+        this.setPotatoPlayer(Bukkit.getPlayer(newPlayer));
     }
 
     private void setPotatoPlayer(Player newPlayer) {
@@ -200,21 +209,26 @@ public class HotPotato extends Minigame implements Listener {
         this.potatoPlayer.getInventory().setContents(emptyItems);
         this.potatoPlayer.getInventory().setExtraContents(emptyItems);
 
-        this.potatoPlayer.getInventory().setItem(4, new ItemBuilder(Material.POTATO).setName("Gib die Kartoffel ab!").toItemStack());
-        this.potatoPlayer.getInventory().setHelmet(new ItemBuilder(Material.PLAYER_HEAD).setCustomSkullWithValue(
-                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2Y0NjI0ZWJmN2Q0MTlhMTFlNDNlZDBjMjAzOGQzMmNkMDlhZDFkN2E2YzZlMjBmNjMzOWNiY2ZlMzg2ZmQxYyJ9fX0="
-        ).toItemStack());
+        this.potatoPlayer.getInventory().setHelmet(ItemBuilder.fromJson(ConfigHandler.get("potato-player-inventory.armor.helmet").getAsJsonObject()).toItemStack());
+        this.potatoPlayer.getInventory().setChestplate(ItemBuilder.fromJson(ConfigHandler.get("potato-player-inventory.armor.chestplate").getAsJsonObject()).toItemStack());
+        this.potatoPlayer.getInventory().setLeggings(ItemBuilder.fromJson(ConfigHandler.get("potato-player-inventory.armor.leggins").getAsJsonObject()).toItemStack());
+        this.potatoPlayer.getInventory().setBoots(ItemBuilder.fromJson(ConfigHandler.get("potato-player-inventory.armor.boots").getAsJsonObject()).toItemStack());
 
 
+        JsonArray hotbar = ConfigHandler.get("potato-player-inventory.hotbar").getAsJsonArray();
+        for (int i = 0; i < 9; i++) {
+            if (hotbar.get(i).getAsJsonObject().size() == 0)continue;
+            this.potatoPlayer.getInventory().setItem(i, ItemBuilder.fromJson(hotbar.get(i).getAsJsonObject()).toItemStack());
+        }
     }
 
 
     private void onPlayerDie(Player p) {
-        p.teleportAsync(LocationUtils.getLocation(Main.getInstance().getJsonConfig().get("locations").getAsJsonObject().get("hub").getAsJsonObject()));
-        spawnFirework(p);
+        p.teleportAsync(LocationUtils.getLocation(ConfigHandler.get("locations.hub").getAsJsonObject()));
+        this.spawnFirework(p);
     }
 
     private void updateBossbar() {
-        new ArrayList<>(players).stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).forEach(this::updateBossbar);
+        new ArrayList<>(this.players).stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).forEach(this::updateBossbar);
     }
 }

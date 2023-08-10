@@ -3,6 +3,7 @@ package de.derioo.gameapi.utils;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ public abstract class Minigame {
     }
 
     public void stop(){
-        isRunning = false;
-        onStop();
+        this.isRunning = false;
+        this.onStop();
     }
 }

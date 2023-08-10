@@ -3,10 +3,11 @@ package de.derioo.gameapi;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.derioo.gameapi.commands.StartPotatoCommand;
-import de.derioo.gameapi.hotpotato.HotPotato;
+import de.derioo.gameapi.hotpotato.HotPotatoGame;
 import de.derioo.gameapi.listeners.ConnectionListener;
 import de.derioo.gameapi.utils.FileUtils;
 import de.derioo.gameapi.utils.GameManager;
+import de.derioo.gameapi.utils.ConfigHandler;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -26,7 +27,7 @@ public final class Main extends JavaPlugin  {
     private JsonObject jsonConfig;
 
     @Getter
-    private HotPotato hotPotato;
+    private HotPotatoGame hotPotato;
 
     @Getter
     private GameManager manager;
@@ -40,7 +41,7 @@ public final class Main extends JavaPlugin  {
         File configFile = new File(this.getDataFolder().getPath(), "config.json");
         if (configFile.exists()) {
             try {
-                jsonConfig = JsonParser.parseString(FileUtils.readFile(configFile)).getAsJsonObject();
+                this.jsonConfig = JsonParser.parseString(FileUtils.readFile(configFile)).getAsJsonObject();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -53,7 +54,7 @@ public final class Main extends JavaPlugin  {
                 throw new RuntimeException(e);
             }
             try {
-                jsonConfig = JsonParser.parseString(FileUtils.readFile(configFile)).getAsJsonObject();
+                this.jsonConfig = JsonParser.parseString(FileUtils.readFile(configFile)).getAsJsonObject();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -61,16 +62,17 @@ public final class Main extends JavaPlugin  {
 
         Bukkit.getPluginManager().registerEvents(new ConnectionListener(), this);
 
-        this.hotPotato = new HotPotato(this);
+        this.hotPotato = new HotPotatoGame(this);
 
         this.manager = new GameManager(this, this.hotPotato);
 
+        new ConfigHandler(this.jsonConfig);
 
         new StartPotatoCommand();
     }
 
     @Override
     public void onDisable() {
-        manager.stopAll();
+        this.manager.stopAll();
     }
 }

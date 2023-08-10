@@ -19,8 +19,60 @@
       "z": 0,
       "yaw": 0,
       "pitch": 0
+    },
+    "win": {
+      "world": "world",
+      "x": 1000,
+      "y": 100,
+      "z": 0,
+      "yaw": 0,
+      "pitch": 0
     }
-
+  },
+  "potato-player-inventory": {
+    "armor": {
+      "helmet": {
+        "material": "PLAYER_HEAD",
+        "name": " ",
+        "lore": [
+          "Schlage andere Spieler, um die Kartoffel abzugeben"
+        ],
+        "is-custom-skull": true,
+        "custom-skull-value": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2Y0NjI0ZWJmN2Q0MTlhMTFlNDNlZDBjMjAzOGQzMmNkMDlhZDFkN2E2YzZlMjBmNjMzOWNiY2ZlMzg2ZmQxYyJ9fX0="
+      },
+      "chestplate": {
+        "material": "AIR",
+        "name": " ",
+        "lore": []
+      },
+      "leggins": {
+        "material": "AIR",
+        "name": " ",
+        "lore": []
+      },
+      "boots": {
+        "material": "AIR",
+        "name": " ",
+        "lore": []
+      }
+    },
+    "hotbar": [
+      {},
+      {},
+      {},
+      {},
+      {
+        "material": "POTATO",
+        "name": "Gib die Kartoffel ab",
+        "lore": [
+          "§cRenn"
+        ]
+      },
+      {},
+      {},
+      {},
+      {}
+    ]
   },
   "messages": {
     "bossbar": "§1Spiel läuft noch §9{duration}",
@@ -28,6 +80,9 @@
     "started": "§1Du hast das Spiel gestartet",
     "reload": "§1Du hast die Config neu geladen",
     "reload-failed": "§1Die Config wird nicht richtig erkannt, versuche es erneut\n siehe Konsole für Stacktrace",
+    "no-perm": "Um diesen Command ausführen zu können, brauchst du mehr Rechte",
+    "need-player": "Um diesen Command ausführen zu können, musst du ein Spieler sein!",
+    "formatted-time": "{seconds} Sekunden",
     "chatmessages": {
       "eliminated": "§9{player} §1ist ausgeschieden",
       "won": "§9{player} §1hat gewonnen"
@@ -37,5 +92,4 @@
       "potato": "KartoffelHalter"
     }
   }
-
 }
