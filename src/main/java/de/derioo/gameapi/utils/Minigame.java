@@ -15,7 +15,7 @@ public abstract class Minigame {
     @Setter
     private boolean isRunning;
 
-    public Minigame(){
+    public Minigame() {
         this.isRunning = false;
     }
 
@@ -30,12 +30,12 @@ public abstract class Minigame {
 
     public abstract void onRunning();
 
-    public void start(ArrayList<UUID> players){
+    public void start(ArrayList<UUID> players) {
         this.isRunning = true;
         this.onStart(players);
     }
 
-    public void stop(){
+    public void stop() {
         this.isRunning = false;
         this.onStop();
     }

@@ -3,6 +3,7 @@ package de.derioo.gameapi.commands;
 import com.google.gson.JsonParser;
 import de.derioo.gameapi.Main;
 import de.derioo.gameapi.utils.Command;
+import de.derioo.gameapi.utils.ConfigHandler;
 import de.derioo.gameapi.utils.FileUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -10,7 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,14 +26,14 @@ public class StartPotatoCommand extends Command {
                 Main.getInstance().setJsonConfig(JsonParser.parseString(FileUtils.readFile(new File(Main.getInstance().getDataFolder().getPath(), "config.json"))).getAsJsonObject());
             } catch (Exception e) {
                 e.printStackTrace();
-                p.sendMessage(Component.text(Main.getInstance().getJsonConfig().get("messages").getAsJsonObject().get("reload-failed").getAsString()));
+                p.sendMessage(Component.text(ConfigHandler.getMessage("reload-failed").getAsString()));
                 return;
             }
-            p.sendMessage(Component.text(Main.getInstance().getJsonConfig().get("messages").getAsJsonObject().get("reload").getAsString()));
+            p.sendMessage(Component.text(ConfigHandler.getMessage("reload").getAsString()));
             return;
         }
         Main.getInstance().getManager().start(Main.getInstance().getHotPotato(), new ArrayList<>(Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).toList()));
-        p.sendMessage(Component.text(Main.getInstance().getJsonConfig().get("messages").getAsJsonObject().get("started").getAsString()));
+        p.sendMessage(Component.text(ConfigHandler.getMessage("started").getAsString()));
     }
 
     @Override

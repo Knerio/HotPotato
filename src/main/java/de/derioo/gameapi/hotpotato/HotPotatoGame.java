@@ -1,17 +1,18 @@
 package de.derioo.gameapi.hotpotato;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.derioo.gameapi.utils.ConfigHandler;
 import de.derioo.gameapi.utils.ItemBuilder;
 import de.derioo.gameapi.utils.LocationUtils;
-import de.derioo.gameapi.Main;
-import de.derioo.gameapi.utils.ConfigHandler;
 import de.derioo.gameapi.utils.Minigame;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Particle;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -43,7 +44,7 @@ public class HotPotatoGame extends Minigame implements Listener {
     private final Map<Player, BossBar> bossbars = new HashMap<>();
 
     public HotPotatoGame(Plugin plugin) {
-        this.maxTimePerRound = Main.getInstance().getJsonConfig().get("timeConfig").getAsJsonObject().get("maxTimePerRoundInTicks").getAsInt();
+        this.maxTimePerRound = ConfigHandler.get("timeConfig.maxTimePerRoundInTicks").getAsInt();
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, this.plugin);
     }
@@ -117,7 +118,7 @@ public class HotPotatoGame extends Minigame implements Listener {
     }
 
     private void nextRound() {
-        this.maxTimePerRound = (this.maxTimePerRound - Main.getInstance().getJsonConfig().get("timeConfig").getAsJsonObject().get("timeLossPerRoundInTicks").getAsInt()) <= 0 ? this.maxTimePerRound : (this.maxTimePerRound - Main.getInstance().getJsonConfig().get("timeConfig").getAsJsonObject().get("timeLossPerRoundInTicks").getAsInt());
+        this.maxTimePerRound = (this.maxTimePerRound - ConfigHandler.get("timeConfig.timeLossPerRoundInTicks").getAsInt()) <= 0 ? this.maxTimePerRound : (this.maxTimePerRound - ConfigHandler.get("timeConfig.timeLossPerRoundInTicks").getAsInt());
         if (this.players.size() <= 1) {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(Component.text(ConfigHandler.getMessage("chatmessages.won").getAsString().replace("{player}", Bukkit.getPlayer(this.players.get(0)).getName())));
@@ -199,8 +200,6 @@ public class HotPotatoGame extends Minigame implements Listener {
             this.potatoPlayer.getInventory().setArmorContents(emptyItems);
             this.potatoPlayer.getInventory().setContents(emptyItems);
             this.potatoPlayer.getInventory().setExtraContents(emptyItems);
-
-
         }
 
         this.potatoPlayer = newPlayer;

@@ -2,7 +2,6 @@ package de.derioo.gameapi.utils;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.derioo.gameapi.Main;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,26 +15,24 @@ public class ConfigHandler {
     }
 
     public static JsonElement getMessage(String message){
-        if (!message.contains("."))return config.get("messages").getAsJsonObject().get(message);
+        if (!message.contains("."))return ConfigHandler.config.get("messages").getAsJsonObject().get(message);
 
-        JsonObject currentObject = config.get("messages").getAsJsonObject();
+        JsonObject currentObject = ConfigHandler.config.get("messages").getAsJsonObject();
 
-        ArrayList<String> split = new java.util.ArrayList<>(Arrays.stream(message.split("\\.")).toList());
-        split.remove(split.size()-1);
-        for (String s : split) {
-            currentObject = currentObject.get(s).getAsJsonObject();
-        }
-
-        return currentObject.get(message.split("\\.")[message.split("\\.").length-1]);
+        return getElement(message, currentObject);
     }
 
 
     public static JsonElement get(String location){
-        if (!location.contains("."))return config.get(location);
+        if (!location.contains("."))return ConfigHandler.config.get(location);
 
-        JsonObject currentObject = config;
+        JsonObject currentObject = ConfigHandler.config;
 
-        ArrayList<String> split = new java.util.ArrayList<>(Arrays.stream(location.split("\\.")).toList());
+        return getElement(location, currentObject);
+    }
+
+    private static JsonElement getElement(String location, JsonObject currentObject) {
+        ArrayList<String> split = new ArrayList<>(Arrays.stream(location.split("\\.")).toList());
         split.remove(split.size()-1);
         for (String s : split) {
             currentObject = currentObject.get(s).getAsJsonObject();

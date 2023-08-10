@@ -4,10 +4,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.derioo.gameapi.commands.StartPotatoCommand;
 import de.derioo.gameapi.hotpotato.HotPotatoGame;
-import de.derioo.gameapi.listeners.ConnectionListener;
+import de.derioo.gameapi.utils.ConfigHandler;
 import de.derioo.gameapi.utils.FileUtils;
 import de.derioo.gameapi.utils.GameManager;
-import de.derioo.gameapi.utils.ConfigHandler;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -17,7 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 
-public final class Main extends JavaPlugin  {
+public final class Main extends JavaPlugin {
 
     @Getter
     private static Main instance;
@@ -36,6 +35,18 @@ public final class Main extends JavaPlugin  {
     public void onEnable() {
         instance = this;
 
+        loadConfig();
+
+        this.hotPotato = new HotPotatoGame(this);
+
+        this.manager = new GameManager(this, this.hotPotato);
+
+        new ConfigHandler(this.jsonConfig);
+
+        new StartPotatoCommand();
+    }
+
+    private void loadConfig() {
         this.getDataFolder().mkdirs();
 
         File configFile = new File(this.getDataFolder().getPath(), "config.json");
@@ -59,16 +70,6 @@ public final class Main extends JavaPlugin  {
                 throw new RuntimeException(e);
             }
         }
-
-        Bukkit.getPluginManager().registerEvents(new ConnectionListener(), this);
-
-        this.hotPotato = new HotPotatoGame(this);
-
-        this.manager = new GameManager(this, this.hotPotato);
-
-        new ConfigHandler(this.jsonConfig);
-
-        new StartPotatoCommand();
     }
 
     @Override

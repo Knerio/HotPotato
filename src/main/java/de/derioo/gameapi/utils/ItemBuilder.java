@@ -6,12 +6,10 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import org.apache.commons.codec.binary.Base64;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -214,7 +212,7 @@ public class ItemBuilder {
 
         GameProfile profile = new GameProfile(UUID.randomUUID(), null);
         profile.getProperties().put("textures", new Property("textures", data));
-        Field profileField = null;
+        Field profileField;
         try {
             profileField = headMeta.getClass().getDeclaredField("profile");
             profileField.setAccessible(true);
@@ -222,7 +220,7 @@ public class ItemBuilder {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        this.itemStack.setItemMeta((ItemMeta) headMeta);
+        this.itemStack.setItemMeta(headMeta);
         return this;
     }
 
@@ -274,16 +272,19 @@ public class ItemBuilder {
     public static ItemBuilder fromJson(JsonObject object) {
         ItemBuilder builder = new ItemBuilder(Material.valueOf(object.get("material").getAsString()));
 
-        if (object.has("lore"))
-            if (object.get("lore").getAsJsonArray().size() != 0){
+        if (object.has("lore")) {
+            if (object.get("lore").getAsJsonArray().size() != 0)
                 builder = builder.setLore(object.get("lore").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList());
-            }
+        }
+
+
         if (object.has("name"))
             builder = builder.setName(object.get("name").getAsString());
+
+
         if (object.has("is-custom-skull")) {
-            if (object.get("is-custom-skull").getAsBoolean()) {
+            if (object.get("is-custom-skull").getAsBoolean())
                 builder = builder.setCustomSkullWithValue(object.get("custom-skull-value").getAsString());
-            }
         }
         return builder;
     }

@@ -100,9 +100,7 @@ public abstract class Command implements CommandExecutor, TabCompleter {
                 if (s1.startsWith(currentarg)) {
                     completeList.add(s);
                 }
-            } catch (Exception ex) {
-
-            }
+            } catch (Exception ignored) {}
         }
         return completeList;
     }
